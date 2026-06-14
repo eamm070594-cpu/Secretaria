@@ -266,6 +266,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.morning-banner{background:linear-gradient(135deg,rgba(124,106,247,0.2),rgba(96,165,250,0.15));border:1px solid rgba(124,106,247,0.3);border-radius:var(--r);padding:14px;margin:12px 16px;display:none;flex-direction:column;gap:10px;flex-shrink:0;}
+.morning-banner h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.morning-banner p{font-size:12px;color:var(--muted2);line-height:1.5;}
+.morning-pending{display:flex;flex-direction:column;gap:5px;}
+.mpitem{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);}
+.mpitem:last-child{border-bottom:none;}
+.mpcheck{width:18px;height:18px;border-radius:4px;border:1px solid var(--border2);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;transition:all .15s;}
+.mpcheck.done{background:var(--green);border-color:var(--green);color:#000;}
+.mpname{flex:1;font-size:13px;}
+.mpname.done{text-decoration:line-through;color:var(--muted);}
+.morning-actions{display:flex;gap:8px;}
+.mact-btn{flex:1;padding:9px;border-radius:var(--rs);border:none;cursor:pointer;font-size:13px;font-weight:500;}
+.mact-primary{background:var(--accent);color:#fff;}
+.mact-secondary{background:var(--card2);color:var(--muted2);border:1px solid var(--border);}
 </style>
 </head>
 <body>
@@ -313,6 +327,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- CHAT -->
 <div class="page" id="page-chat">
+  <!-- MORNING BANNER -->
+  <div class="morning-banner" id="morning-banner">
+    <h3>☀️ Buenos días — pendientes de hoy</h3>
+    <div class="morning-pending" id="morning-pending"></div>
+    <div class="morning-actions">
+      <button class="mact-btn mact-primary" onclick="morningDone()">✓ Revisé todo</button>
+      <button class="mact-btn mact-secondary" onclick="morningSnooze()">⏰ Recuérdame en 30min</button>
+    </div>
+  </div>
   <div class="chat-area" id="chat-area">
     <div class="msg assistant">
       <div class="mav">✦</div>
@@ -518,6 +541,7 @@ window.onload=()=>{
   document.getElementById('g-date').value=today();
   document.getElementById('p-fecha').value=today();
   checkNotif();initSpeech();renderAll();
+  setTimeout(initMorning, 1200); // init after UI ready
 };
 
 function saveKey(){const k=document.getElementById('api-inp').value.trim();if(!k.startsWith('sk-ant-')){alert('La clave debe empezar con sk-ant-');return;}API_KEY=k;localStorage.setItem('sv_akey',k);document.getElementById('api-modal').style.display='none';}
@@ -891,8 +915,8 @@ function doSearch(q){renderLtab('rec','recordatorios','ti-bell','Sin recordatori
 function openGCal(item){const t=encodeURIComponent(item.titulo),d=encodeURIComponent(item.descripcion||'');let dates='';if(item.fecha){const dd=item.fecha.replace(/-/g,'');if(item.hora){const[h,m]=item.hora.split(':');dates=`${dd}T${h}${m}00/${dd}T${String(+h+1).padStart(2,'0')}${m}00`;}else dates=`${dd}/${dd}`;}window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${t}&details=${d}${dates?'&dates='+dates:''}`, '_blank');}
 
 // ── NOTIFICATIONS ──────────────────────────────────────────
-function checkNotif(){if(!('Notification' in window))return;if(Notification.permission==='default')document.getElementById('notif-bar').style.display='flex';else if(Notification.permission==='granted'){notifOK=true;}}
-async function reqNotif(){const p=await Notification.requestPermission();if(p==='granted'){notifOK=true;document.getElementById('notif-bar').style.display='none';toast('✓ Notificaciones activadas');}else toast('Notificaciones bloqueadas');}
+function checkNotif(){if(!('Notification' in window))return;if(Notification.permission==='default')document.getElementById('notif-bar').style.display='flex';else if(Notification.permission==='granted'){notifOK=true;document.getElementById('notif-bar').style.display='none';}}
+async function reqNotif(){const p=await Notification.requestPermission();if(p==='granted'){notifOK=true;document.getElementById('notif-bar').style.display='none';toast('✓ Notificaciones activadas');initMorning();}else toast('Notificaciones bloqueadas');}
 function schedNotif(titulo,fecha,hora){if(!notifOK)return;const ms=new Date(`${fecha}T${hora}:00`).getTime()-Date.now();if(ms>0&&ms<2*3600*1000){setTimeout(()=>{new Notification('⏰ Recordatorio',{body:titulo});},ms);toast(`🔔 Notificación a las ${hora}`);}}
 
 // ── MODAL ──────────────────────────────────────────────────
