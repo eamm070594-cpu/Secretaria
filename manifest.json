@@ -2,7 +2,7 @@
   "name": "Secretaria Virtual",
   "short_name": "Secretaria",
   "description": "Tu asistente personal con IA",
-  "start_url": "/Secretaria/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#0d0d12",
   "theme_color": "#0d0d12",
@@ -20,5 +20,6 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "scope": "."
 }
